@@ -1,0 +1,22 @@
+{
+  "name": "toyshader",
+  "version": "1.0.0",
+  "description": "playing with three.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MaxBittker/toyShader.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MaxBittker/toyShader/issues"
+  },
+  "homepage": "https://github.com/MaxBittker/toyShader#readme",
+  "dependencies": {
+    "three": "^0.76.1"
+  }
+}
