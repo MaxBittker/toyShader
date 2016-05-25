@@ -52,9 +52,9 @@ function init() {
 
   void main() {
  gl_FragColor = vec4(
-                sin(pow((gl_FragCoord.x - 360.0), 2.0) - pow((gl_FragCoord.y - 210.0), 2.0) * (cx / 15000.0)),
-                sin(pow((gl_FragCoord.x - 360.0), 2.0) - pow((gl_FragCoord.y - 210.0), 2.0) * (cy / 15000.0)),
-                sin(pow((gl_FragCoord.x - 360.0), 2.0) - pow((gl_FragCoord.y - 210.0), 2.0) * (cx * cy / 150000.0)),
+                sin(pow((gl_FragCoord.x - 360.0), 1.5) - pow((gl_FragCoord.y - 210.0), 2.0) * (cx / 15000.0) + uTime),
+                sin(pow((gl_FragCoord.x - 360.0), 2.0) - pow((gl_FragCoord.y - 210.0), 2.0) * (cy / 15000.0) + uTime),
+                sin(pow((gl_FragCoord.x - 360.0), 2.0) - pow((gl_FragCoord.y - 210.0), 2.0) * (cx * cy / 50000.0) + uTime),
                 1);
   }`
 
@@ -79,7 +79,9 @@ function animate() {
   uniforms.uTime.value += 0.1;
 
   requestAnimationFrame( animate );
-  // mesh.rotation.x += 0.02;
+  // mesh.rotation.x = uniforms.cx.value/100;
+  // mesh.rotation.y = uniforms.cy.value/100;
+
   // mesh.rotation.y += 0.02;
   // camera.position.z -= 0.1;
   // camera.position.z = uniforms.cx.value * Math.random();
