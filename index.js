@@ -64,7 +64,7 @@ function animate() {
   const c = Date.now()
   if( c -lastRender > 35 && scene.children.length>15){
     scene.children = scene.children.slice(1)
-    console.log(scene.children.length, c - lastRender)
+    // console.log(scene.children.length, c - lastRender)
   }
   lastRender = c
   renderer.render( scene, camera );
