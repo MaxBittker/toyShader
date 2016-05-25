@@ -21,8 +21,8 @@ function init() {
   const row = (Math.sqrt(many)/2) |0
   for(let x = -row; x<row; x+=1){
     for(let y = -row; y<row; y+=1){
-      material =  new THREE.MeshBasicMaterial( { color: HUSL.toHex(Math.random()*359, 99,70)} );
-      geometry =new THREE.SphereGeometry( 1, 7, 7 );
+      material =  new THREE.MeshBasicMaterial( { color: HUSL.toHex(Math.random()*359, 60,60)} );
+      geometry =new THREE.SphereGeometry( .9, 7, 7 );
       mesh = new THREE.Mesh( geometry, material );
       mesh.position.x = x;
       mesh.position.y = y;
@@ -32,6 +32,8 @@ function init() {
   }
   renderer = new THREE.WebGLRenderer();
   renderer.setSize( window.innerWidth, window.innerHeight );
+  renderer.setClearColor(0xfaf7f0, 1);
+
   document.body.appendChild( renderer.domElement );
 
 }
