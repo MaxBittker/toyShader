@@ -6,41 +6,8 @@ const origin = new THREE.Vector3(0,0,0)
 let cursor = {x:150,y:150}
 let lastRender = new Date()
 const startCount = 250
-var uniforms = {
-   uTime: { type: "f", value: 1.0 },
-   cx: { type: "f", value: 50.0 },
-   cy: { type: "f", value: 50.0 },
-   resolution: { value: new THREE.Vector2() },
- }
-
- material = new THREE.ShaderMaterial( {
-
- 	uniforms,
- 	attributes: {
- 		vertexOpacity: { value: [] }
- 	},
- 	vertexShader:
-   `void main() {
-   gl_Position = projectionMatrix *
-                 modelViewMatrix *
-                 vec4(position, 1.0);
-   }`,
- 	fragmentShader:
-   `
-   uniform float uTime;
-   uniform float cx;
-   uniform float cy;
 
 
-   void main() {
-  gl_FragColor = vec4(
-                 sin(pow((gl_FragCoord.x - 360.0), 2.0) - pow((gl_FragCoord.y - 210.0), 2.0) * (cx / 15000.0)),
-                 sin(pow((gl_FragCoord.x - 360.0), 2.0) - pow((gl_FragCoord.y - 210.0), 2.0) + uTime * 20.0 ),
-                 sin(pow((gl_FragCoord.x - 360.0), 2.0) - pow((gl_FragCoord.y - 210.0), 2.0) + (uTime)),
-                 1);
-   }`
-
- } );
 
 
 document.onmousemove = e => {
@@ -54,7 +21,7 @@ const birth = () => {
     loc.copy(parent.position)
   }
   let color  =  HUSL.toHex(Math.random()*360|0, 65,60)
-  // let material = new THREE.MeshBasicMaterial( { color, transparent: true, opacity: 0.8 } )
+  let material = new THREE.MeshBasicMaterial( { color, transparent: true, opacity: 0.8 } )
   geometry = new THREE.SphereGeometry( .9, 7, 7 )
   mesh = new THREE.Mesh( geometry, material )
   mesh.position.copy(loc)
@@ -105,7 +72,6 @@ const animate = () => {
     scene.children = scene.children.slice(1)
   } else if(tickTime < 30)
     birth()
-  uniforms.uTime.value+= 0.1;
   lastRender = c
   renderer.render(scene, camera )
 
