@@ -1,6 +1,11 @@
 var path = require("path");
+var entry = ['./index.js']
+
+if(process.argv[3] != "-p")
+  entry.push('webpack/hot/dev-server')
+
 module.exports = {
-  entry:[ './index.js'],
+  entry: entry,
   output: {
     path: path.resolve(__dirname, "dist"),
     publicPath: "/build/",

@@ -1,2 +1,2 @@
 # toyShader
-playing with three.js
+This version no longer has any custom shaders, but
