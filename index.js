@@ -16,7 +16,7 @@ function init() {
 
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
-  camera.position.z = 20;
+  camera.position.z = 25;
   const many = 400
   const row = (Math.sqrt(many)/2) |0
   for(let x = -row; x<row; x+=1){
