@@ -1,115 +1,149 @@
-let THREE = require('three')
-let HUSL = require('husl')
-let scene, camera, renderer
-let geometry, material, mesh
-const origin = new THREE.Vector3(0,0,0)
-let cursor = {x:150,y:150}
-let lastRender = new Date()
-const startCount = 250
+var THREE = require('three')
+var HUSL = require('husl')
+var scene, camera, renderer;
+var geometry, material, mesh;
 var uniforms = {
-   uTime: { type: "f", value: 1.0 },
-   cx: { type: "f", value: 50.0 },
-   cy: { type: "f", value: 50.0 },
-   resolution: { value: new THREE.Vector2() },
- }
-
- material = new THREE.ShaderMaterial( {
-
- 	uniforms,
- 	attributes: {
- 		vertexOpacity: { value: [] }
- 	},
- 	vertexShader:
-   `void main() {
-   gl_Position = projectionMatrix *
-                 modelViewMatrix *
-                 vec4(position, 1.0);
-   }`,
- 	fragmentShader:
-   `
-   uniform float uTime;
-   uniform float cx;
-   uniform float cy;
-
-
-   void main() {
-  gl_FragColor = vec4(
-                 sin(pow((gl_FragCoord.x - 360.0), 2.0) - pow((gl_FragCoord.y - 210.0), 2.0) * (cx / 15000.0)),
-                 sin(pow((gl_FragCoord.x - 360.0), 2.0) - pow((gl_FragCoord.y - 210.0), 2.0) + uTime * 20.0 ),
-                 sin(pow((gl_FragCoord.x - 360.0), 2.0) - pow((gl_FragCoord.y - 210.0), 2.0) + (uTime)),
-                 1);
-   }`
-
- } );
-
-
-document.onmousemove = e => {
-    cursor.x = window.innerWidth - e.x
-    cursor.y = window.innerHeight -e.y
+  uTime: { type: "f", value: 1.0 },
+  cx: { type: "f", value: 1.0 },
+  cy: { type: "f", value: 1.0 },
+  resolution: { value: new THREE.Vector2(200,200) },
 }
-const birth = () => {
-  let loc = origin.clone()
-  if(scene.children.length>0) {
-    let parent =scene.children[Math.random()*(scene.children.length-1)|0]
-    loc.copy(parent.position)
+
+init();
+animate();
+function init() {
+
+  scene = new THREE.Scene();
+
+  camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
+  camera.position.z = 7;
+
+  var geometry = new THREE.Geometry();
+
+  geometry.vertices.push(
+  	new THREE.Vector3(  10,  10, 0 ),
+  	new THREE.Vector3( -10, -10, 0 ),
+  	new THREE.Vector3(  10, -10, 0 ),
+    new THREE.Vector3( -10,  10, 0 )
+  );
+
+  geometry.faces.push( new THREE.Face3( 0, 1, 2) );
+  geometry.faces.push( new THREE.Face3( 0, 3, 1) );
+
+
+  var material = new THREE.ShaderMaterial( {
+
+	uniforms,
+	attributes: {
+		vertexOpacity: { value: [] }
+	},
+	vertexShader:
+  `void main() {
+  gl_Position = projectionMatrix *
+                modelViewMatrix *
+                vec4(position, 1.0);
+  }`,
+	fragmentShader:
+  `
+  uniform float uTime;
+  uniform float cx;
+  uniform float cy;
+  uniform vec2 resolution;
+
+
+
+
+  float sdSphere( vec3 p, float s )
+  {
+    return length(p)-s;
   }
-  let color  =  HUSL.toHex(Math.random()*360|0, 65,60)
-  // let material = new THREE.MeshBasicMaterial( { color, transparent: true, opacity: 0.8 } )
-  geometry = new THREE.SphereGeometry( .9, 7, 7 )
-  mesh = new THREE.Mesh( geometry, material )
-  mesh.position.copy(loc)
-  mesh.velocity = new THREE.Vector3((Math.random()-0.5),(Math.random()-0.5),(Math.random()-0.5))
-  scene.add( mesh )
+
+  // vec3 opTx( vec3 p, mat4 m )
+  // {
+  //     vec3 q = invert(m)*p;
+  //     return sdTorus(q, vec2(0.2, 0.2));
+  // }
+
+  float sdTorus( vec3 p, vec2 t )
+  {
+  vec2 q = vec2(length(p.yz)-t.y,p.x);
+  return length(q)-t.x;
+  }
+
+
+  float opRep( vec3 p, vec3 c )
+  {
+      vec3 q = mod(p,c)-0.5*c;
+      // return opTx(p, mat4(0.0,0.5,0.0,0.0));
+      // return sdSphere( q, 0.3 + (.01*sin(uTime)));
+      return sdTorus( q, vec2(0.2, 0.8));
+
+  }
+  void main() {
+
+    vec3 eye = vec3(0, 0, -1);
+    vec3 up = vec3(0, 1, 0);
+    vec3 right = vec3(1, 0, 0);
+    vec3 forward = vec3(0, 0, -1);
+
+
+    float u = gl_FragCoord.x * 2.0 / resolution.x - 1.0;
+    float v = gl_FragCoord.y * 2.0 / resolution.y - 1.0;
+    vec3 ro = vec3(0.0, uTime,0.0);
+    vec3 rd = eye + (forward * vec3(0.8)) + (right * u) + (up * v);
+
+    vec4 color = vec4(193.0/255.0,164.0/255.0,126.0/255.0,1.0); // Sky color
+
+    float t = 0.0;
+    const int maxSteps = 30;
+    for(int i = 0; i < maxSteps; ++i)
+    {
+        vec3 p = ro + rd * t;
+        float d = opRep(p, vec3(2,2,2));
+
+        if(d < 0.0001)
+        {
+            float c = (float(i) / float(maxSteps)) ;
+            color = color * vec4(c,c,c,1); // Sphere color
+            break;
+        }
+
+        t += d;
+    }
+
+    gl_FragColor  = color;
+
+
+  }`
+/*
+gl_FragColor = vec4(
+               sin(pow((gl_FragCoord.x - 360.0), 2.0) - pow((gl_FragCoord.y - 210.0), 2.0) * (cx / 15000.0)),
+               sin(pow((gl_FragCoord.x - 360.0), 2.0) - pow((gl_FragCoord.y - 210.0), 2.0) * (cy / 15000.0)),
+               sin(pow((gl_FragCoord.x - 360.0), 2.0) - pow((gl_FragCoord.y - 210.0), 2.0) * (cx * cy / 150000.0)),
+               1);
+               */
+} );
+
+
+  mesh = new THREE.Mesh( geometry, material );
+
+  scene.add( mesh );
+
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize( window.innerWidth, window.innerHeight );
+  renderer.setClearColor('#c1a47e', 1)
+
+  document.body.appendChild( renderer.domElement );
+
 }
-
-const init = () => {
-  scene = new THREE.Scene()
-
-  camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 )
-  camera.position.z = 22
-
-  renderer = new THREE.WebGLRenderer()
-  renderer.setSize( window.innerWidth, window.innerHeight )
-  renderer.setClearColor(0xfaf7f0, 1)
-  document.body.appendChild( renderer.domElement )
+document.onmousemove = function(e){
+    uniforms.cx = { type: "f", value: e.pageX };
+    uniforms.cy = { type: "f", value: e.pageY };
 }
+function animate() {
+  uniforms.uTime.value += 0.01;
 
-
-const animate = () => {
-  requestAnimationFrame( animate )
-  scene.children.forEach(me => {
-    if(me.type!=="Mesh") return
-    let move = origin.clone()
-
-    scene.children.forEach(friend => {
-      if(friend === me || friend.type !== "Mesh") return
-      let distance = friend.position.clone().sub(me.position)
-      let delta = distance.length()
-      if(delta < 20)
-        move.sub(distance.setLength(Math.pow(delta, -1) * 10))
-      else if(delta > 150)
-        move.add(distance.max(25))
-      else
-        move.add(me.position.clone().cross(distance))
-    })
-
-    me.velocity.add(move.normalize().divideScalar(20))
-    me.velocity.sub(me.position.clone().divideScalar(cursor.y * 2))
-    me.position.add(me.velocity.normalize().divideScalar( 1 + (cursor.x / 100)))
-
-  })
-
-  const c = Date.now()
-  const tickTime = c - lastRender
-  if( tickTime > 35 && scene.children.length > 15){
-    scene.children = scene.children.slice(1)
-  } else if(tickTime < 30)
-    birth()
-  uniforms.uTime.value+= 0.1;
-  lastRender = c
-  renderer.render(scene, camera )
+  requestAnimationFrame( animate );
+  renderer.render( scene, camera );
 
 }
-
-init()
-animate()
