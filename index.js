@@ -6,7 +6,7 @@ var uniforms = {
   uTime: { type: "f", value: 1.0 },
   cx: { type: "f", value: 1.0 },
   cy: { type: "f", value: 1.0 },
-  resolution: { value: new THREE.Vector2(200,200) },
+  resolution: { value: new THREE.Vector2(500,500) },
 }
 
 init();
@@ -89,22 +89,22 @@ function init() {
 
     float u = gl_FragCoord.x * 2.0 / resolution.x - 1.0;
     float v = gl_FragCoord.y * 2.0 / resolution.y - 1.0;
-    vec3 ro = vec3(0.0, uTime,0.0);
-    vec3 rd = eye + (forward * vec3(0.8)) + (right * u) + (up * v);
+    vec3 ro = vec3(tan(uTime), 1, 1);
+    vec3 rd = eye + (right * vec3(1.0)) + (forward * v) + (up * u);
 
     vec4 color = vec4(193.0/255.0,164.0/255.0,126.0/255.0,1.0); // Sky color
 
     float t = 0.0;
-    const int maxSteps = 30;
+    const int maxSteps = 16;
     for(int i = 0; i < maxSteps; ++i)
     {
         vec3 p = ro + rd * t;
-        float d = opRep(p, vec3(2,2,2));
+        float d = opRep(p, vec3(2.1,2.1,2.1));
 
-        if(d < 0.0001)
+        if(d < 0.01)
         {
             float c = (float(i) / float(maxSteps)) ;
-            color = color * vec4(c,c,c,1); // Sphere color
+            color = color * vec4(0.1-v*c,c,c,1); // Sphere color
             break;
         }
 
